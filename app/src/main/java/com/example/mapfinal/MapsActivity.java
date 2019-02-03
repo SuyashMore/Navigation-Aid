@@ -39,6 +39,7 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
@@ -85,6 +86,8 @@ public class MapsActivity extends FragmentActivity implements GoogleMap.OnMyLoca
 
 //    Polyline Data
     private ArrayList<PolylineData> mPolylinesData = new ArrayList<>();
+    private ArrayList<Marker> mTripMarkers = new ArrayList<>();
+    private Marker mSelectedMarker;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -179,7 +182,7 @@ public class MapsActivity extends FragmentActivity implements GoogleMap.OnMyLoca
     private void geoLocate() {
         Log.d(TAG, "geoLocate: Geolocating");
 
-        
+
         String searchString = mSearchText.getText().toString();
 
         Geocoder geocoder = new Geocoder(MapsActivity.this);
@@ -276,11 +279,15 @@ public class MapsActivity extends FragmentActivity implements GoogleMap.OnMyLoca
         Log.d(TAG, "moveCamera: moving the camera to: lat: " + latLng.latitude + ", lng: " + latLng.longitude );
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, zoom));
 
+        resetSelectedMarkers();
+
         if(!title.equals("My Location")){
             MarkerOptions options = new MarkerOptions()
                     .position(latLng)
                     .title(title);
-            mMap.addMarker(options);
+            Marker marker = mMap.addMarker(options);
+            mSelectedMarker=marker;
+            mTripMarkers.add(marker);
         }
 
         hideSoftKeyboard();
@@ -399,6 +406,9 @@ public class MapsActivity extends FragmentActivity implements GoogleMap.OnMyLoca
             {
                 polylineData.getPolyline().setColor(ContextCompat.getColor(getApplicationContext(),R.color.holo_blue));
                 polyline.setZIndex(10);
+
+
+//                mTripMarkers.add(marker);
             }
             else
             {
@@ -407,6 +417,24 @@ public class MapsActivity extends FragmentActivity implements GoogleMap.OnMyLoca
             }
         }
 
+    }
+
+    private void removeTripMarkers()
+    {
+        for(Marker marker:mTripMarkers)
+        {
+            marker.remove();
+        }
+    }
+
+    private void resetSelectedMarkers()
+    {
+        if(mSelectedMarker != null)
+        {
+            mSelectedMarker.setVisible(true);
+            mSelectedMarker = null;
+            removeTripMarkers();
+        }
     }
 }
 
