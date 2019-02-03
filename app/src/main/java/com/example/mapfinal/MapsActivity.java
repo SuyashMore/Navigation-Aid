@@ -198,9 +198,15 @@ public class MapsActivity extends FragmentActivity implements GoogleMap.OnMyLoca
             Address address = list.get(0);
 
             Log.d(TAG, "geoLocate: found a location: " + address.toString());
-            moveCamera(new LatLng(address.getLatitude(),address.getLongitude()),DEFAULT_ZOOM,address.getAddressLine(0));
+//            moveCamera(new LatLng(address.getLatitude(),address.getLongitude()),DEFAULT_ZOOM,address.getAddressLine(0));
+            
+
             if(doOnce)
             {
+                ArrayList<LatLng> transform = new ArrayList<>();
+                transform.add(new LatLng(myLoc.latitude,myLoc.longitude));
+                transform.add(new LatLng(address.getLatitude(),address.getLongitude()));
+                zoomRoute(transform);
                 calculateDirections(address.getLatitude(),address.getLongitude());
             }
         }
@@ -416,7 +422,7 @@ public class MapsActivity extends FragmentActivity implements GoogleMap.OnMyLoca
                 polyline.setZIndex(0);
             }
         }
-        
+
         zoomRoute(polyline.getPoints());
 
     }
