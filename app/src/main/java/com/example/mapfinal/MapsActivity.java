@@ -416,6 +416,8 @@ public class MapsActivity extends FragmentActivity implements GoogleMap.OnMyLoca
                 polyline.setZIndex(0);
             }
         }
+        
+        zoomRoute(polyline.getPoints());
 
     }
 
@@ -435,6 +437,24 @@ public class MapsActivity extends FragmentActivity implements GoogleMap.OnMyLoca
             mSelectedMarker = null;
             removeTripMarkers();
         }
+    }
+
+    public void zoomRoute(List<LatLng> lstLatLngRoute) {
+
+        if (mMap == null || lstLatLngRoute == null || lstLatLngRoute.isEmpty()) return;
+
+        LatLngBounds.Builder boundsBuilder = new LatLngBounds.Builder();
+        for (LatLng latLngPoint : lstLatLngRoute)
+            boundsBuilder.include(latLngPoint);
+
+        int routePadding = 120;
+        LatLngBounds latLngBounds = boundsBuilder.build();
+
+        mMap.animateCamera(
+                CameraUpdateFactory.newLatLngBounds(latLngBounds, routePadding),
+                600,
+                null
+        );
     }
 }
 
