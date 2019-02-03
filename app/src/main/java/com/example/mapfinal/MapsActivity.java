@@ -60,7 +60,8 @@ public class MapsActivity extends FragmentActivity implements GoogleMap.OnMyLoca
         GoogleMap.OnMyLocationClickListener,
         OnMapReadyCallback,
         ActivityCompat.OnRequestPermissionsResultCallback,
-        GoogleApiClient.OnConnectionFailedListener {
+        GoogleApiClient.OnConnectionFailedListener,
+        GoogleMap.OnPolylineClickListener{
 
     private static final int LOCATION_PERMISSION_REQUEST_CODE = 1;
     private static final String TAG = "MapsActivity";
@@ -81,6 +82,9 @@ public class MapsActivity extends FragmentActivity implements GoogleMap.OnMyLoca
 
     private GeoApiContext mGeoApiContext=null;
 
+
+//    Polyline Data
+    private ArrayList<PolylineData> mPolylinesData = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -175,6 +179,7 @@ public class MapsActivity extends FragmentActivity implements GoogleMap.OnMyLoca
     private void geoLocate() {
         Log.d(TAG, "geoLocate: Geolocating");
 
+        
         String searchString = mSearchText.getText().toString();
 
         Geocoder geocoder = new Geocoder(MapsActivity.this);
@@ -207,6 +212,16 @@ public class MapsActivity extends FragmentActivity implements GoogleMap.OnMyLoca
             public void run() {
                 Log.d(TAG, "run: result routes "+result.routes.length);
 
+                if(mPolylinesData.size() > 0)
+                {
+                    for(PolylineData polylineData:mPolylinesData)
+                    {
+                        polylineData.getPolyline().remove();
+                    }
+                    mPolylinesData.clear();
+                    mPolylinesData = new ArrayList<>();
+                }
+
                 for(DirectionsRoute route:result.routes)
                 {
                     Log.d(TAG, "run: leg:" + route.legs[0].toString());
@@ -226,6 +241,8 @@ public class MapsActivity extends FragmentActivity implements GoogleMap.OnMyLoca
                         Polyline polyline = mMap.addPolyline(new PolylineOptions().addAll(newDecodedPath));
                         polyline.setColor(ContextCompat.getColor(getApplicationContext(),R.color.apploizc_darker_gray_color));
                         polyline.setClickable(true);
+
+                        mPolylinesData.add(new PolylineData(polyline,route.legs[0]));
                     }
                 }
 
@@ -240,7 +257,7 @@ public class MapsActivity extends FragmentActivity implements GoogleMap.OnMyLoca
 
         mMap.setOnMyLocationButtonClickListener(this);
         mMap.setOnMyLocationClickListener(this);
-
+        mMap.setOnPolylineClickListener(this);
 
         enableMyLocation();
         Log.d(TAG, "onMapReady: Getting Fused Location Provider");
@@ -370,4 +387,27 @@ public class MapsActivity extends FragmentActivity implements GoogleMap.OnMyLoca
     public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
 
     }
+
+    @Override
+    public void onPolylineClick(Polyline polyline) {
+
+
+        for(PolylineData polylineData:mPolylinesData)
+        {
+            Log.d(TAG, "onPolylineClick: to String"+polylineData.toString());
+            if(polyline.getId().equals(polylineData.getPolyline().getId()))
+            {
+                polylineData.getPolyline().setColor(ContextCompat.getColor(getApplicationContext(),R.color.holo_blue));
+                polyline.setZIndex(10);
+            }
+            else
+            {
+                polylineData.getPolyline().setColor(ContextCompat.getColor(getApplicationContext(),R.color.apploizc_darker_gray_color));
+                polyline.setZIndex(0);
+            }
+        }
+
+    }
 }
+
+
