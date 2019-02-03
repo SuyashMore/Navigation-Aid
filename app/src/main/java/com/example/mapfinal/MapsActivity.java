@@ -87,18 +87,7 @@ public class MapsActivity extends FragmentActivity implements GoogleMap.OnMyLoca
 
     private void init()
     {
-        mGoogleApiClient = new GoogleApiClient
-                .Builder(this)
-                .addApi(Places.GEO_DATA_API)
-                .addApi(Places.PLACE_DETECTION_API)
-                .enableAutoManage(this, this)
-                .build();
-
-        mPlaceAutocompleteAdapter = new PlaceAutocompleteAdapter(this, mGoogleApiClient,
-                LAT_LNG_BOUNDS, null);
-
-        mSearchText.setAdapter(mPlaceAutocompleteAdapter);
-
+        
         mSearchText.setOnEditorActionListener(new TextView.OnEditorActionListener() {
             @Override
             public boolean onEditorAction(TextView v, int actionId, KeyEvent keyEvent) {
