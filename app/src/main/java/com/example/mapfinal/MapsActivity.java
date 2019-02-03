@@ -39,10 +39,15 @@ import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+import com.google.maps.DirectionsApiRequest;
+import com.google.maps.GeoApiContext;
+import com.google.maps.PendingResult;
+import com.google.maps.model.DirectionsResult;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+
 
 public class MapsActivity extends FragmentActivity implements GoogleMap.OnMyLocationButtonClickListener,
         GoogleMap.OnMyLocationClickListener,
@@ -67,7 +72,7 @@ public class MapsActivity extends FragmentActivity implements GoogleMap.OnMyLoca
     private PlaceAutocompleteAdapter mPlaceAutocompleteAdapter;
     private GoogleApiClient mGoogleApiClient;
 
-
+    private GeoApiContext mGeoApiContext=null;
 
 
     @Override
@@ -78,9 +83,11 @@ public class MapsActivity extends FragmentActivity implements GoogleMap.OnMyLoca
         mSearchText=(AutoCompleteTextView) findViewById(R.id.input_search);
         mGps=(ImageView)findViewById(R.id.ic_gps);
 
+
         SupportMapFragment mapFragment =
                 (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
+
 
 
     }
@@ -111,6 +118,48 @@ public class MapsActivity extends FragmentActivity implements GoogleMap.OnMyLoca
                 getLastKnowLocation();
             }
         });
+
+        if(mGeoApiContext==null)
+        {
+            mGeoApiContext=new GeoApiContext.Builder()
+                            .apiKey(getString(R.string.google_maps_key))
+                            .build();
+
+        }
+    }
+
+    private void calculateDirections(double lat, double lng){
+        Log.d(TAG, "calculateDirections: calculating directions.");
+
+        com.google.maps.model.LatLng destination = new com.google.maps.model.LatLng(
+                lat,
+                lng
+        );
+        DirectionsApiRequest directions = new DirectionsApiRequest(mGeoApiContext);
+
+        directions.alternatives(true);
+        directions.origin(
+                new com.google.maps.model.LatLng(
+                        myLoc.latitude,
+                        myLoc.longitude
+                )
+        );
+        Log.d(TAG, "calculateDirections: destination: " + destination.toString());
+        directions.destination(destination).setCallback(new PendingResult.Callback<DirectionsResult>() {
+            @Override
+            public void onResult(DirectionsResult result) {
+                Log.d(TAG, "calculateDirections: routes: " + result.routes[0].toString());
+                Log.d(TAG, "calculateDirections: duration: " + result.routes[0].legs[0].duration);
+                Log.d(TAG, "calculateDirections: distance: " + result.routes[0].legs[0].distance);
+                Log.d(TAG, "calculateDirections: geocodedWayPoints: " + result.geocodedWaypoints[0].toString());
+            }
+
+            @Override
+            public void onFailure(Throwable e) {
+                Log.e(TAG, "calculateDirections: Failed to get directions: " + e.getMessage() );
+
+            }
+        });
     }
 
     private void geoLocate() {
@@ -126,11 +175,16 @@ public class MapsActivity extends FragmentActivity implements GoogleMap.OnMyLoca
             Log.e(TAG, "geoLocate: IOException: " + e.getMessage());
         }
 
+        boolean doOnce = true;
         if (list.size() > 0) {
             Address address = list.get(0);
 
             Log.d(TAG, "geoLocate: found a location: " + address.toString());
             moveCamera(new LatLng(address.getLatitude(),address.getLongitude()),DEFAULT_ZOOM,address.getAddressLine(0));
+            if(doOnce)
+            {
+                calculateDirections(address.getLatitude(),address.getLongitude());
+            }
         }
     }
 
