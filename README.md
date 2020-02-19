@@ -1,3 +1,4 @@
+## Submission for Hackathon 2.0 Conducted by Ecell - VJTI
 
 <image src="https://i.imgur.com/tvNXGfJ.jpg" />
 <image src="https://i.imgur.com/9sjwFjC.jpg" />
@@ -9,4 +10,3 @@
 <image src="https://i.imgur.com/MjEnAns.jpg" />
 <image src="https://i.imgur.com/4X33hbl.jpg" />
 <image src="https://i.imgur.com/b4bOg3t.jpg" />
-<image src="https://i.imgur.com/rlavI4c.jpg" />
